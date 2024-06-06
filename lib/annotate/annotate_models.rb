@@ -546,6 +546,15 @@ module AnnotateModels
           annotated << model_file_name
         end
 
+        if options[:export_file].present?
+          export_options = options.clone
+          export_options[:format_bare] = options[:export_file_format] == "bare"
+          export_options[:format_markdown] = options[:export_file_format] == "markdown"
+          export_info = get_schema_info(klass, header, export_options)
+          schemaless_table_name = table_name.split('.').last
+          @annotated_exports[schemaless_table_name] = export_info
+        end
+
         matched_types(options).each do |key|
           exclusion_key = "exclude_#{key.pluralize}".to_sym
           position_key = "position_in_#{key}".to_sym
@@ -711,6 +720,11 @@ module AnnotateModels
         header << "\n# Schema version: #{version}"
       end
 
+      @annotated_exports = {}
+      if options[:export_file].present? && File.exists?(options[:export_file])
+        File.truncate(options[:export_file], 0)
+      end
+
       annotated = []
       get_model_files(options).each do |path, filename|
         annotate_model_file(annotated, File.join(path, filename), header, options)
@@ -720,6 +734,23 @@ module AnnotateModels
         puts 'Model files unchanged.'
       else
         puts "Annotated (#{annotated.length}): #{annotated.join(', ')}"
+
+        if options[:export_file].present?
+          # apply post-processing to the exported content:
+          #   - remove the "Schema info" headers
+          #   - remove leading comment chars (#) since the exported file is not a ruby file
+          @annotated_exports.sort.each do |table_name, export_info|
+            File.open(options[:export_file], "ab") do |f|
+              if options[:export_file_format] == "markdown"
+                # for markdown, format the table name line with an H1 header style
+                f.puts export_info.gsub(header,"").gsub(/^#\s/, "").gsub(/Table name:/, "# Table:")
+              else
+                f.puts export_info.gsub(header,"").gsub(/^#\s/, "")
+              end
+            end
+          end
+          puts "Exported to file: #{options[:export_file]}"
+        end
       end
     end
 
