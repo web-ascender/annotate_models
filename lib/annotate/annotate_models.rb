@@ -170,7 +170,11 @@ module AnnotateModels
                      col.name
                    end
         simple_formatted_attrs = attrs.join(", ")
-        [col.name, { col_type: col_type, attrs: attrs, col_name: col_name, simple_formatted_attrs: simple_formatted_attrs, col_comment: col_comment }]
+        col_enum_values = nil
+        if klass.respond_to?(:enumerized_attributes)
+          col_enum_values = klass.enumerized_attributes[col.name]&.values
+        end
+        [col.name, { col_type: col_type, attrs: attrs, col_name: col_name, simple_formatted_attrs: simple_formatted_attrs, col_comment: col_comment, col_enum_values: col_enum_values }]
       end.to_h
 
       # Output annotation
@@ -182,6 +186,7 @@ module AnnotateModels
         col_name = cols_meta[col.name][:col_name]
         simple_formatted_attrs = cols_meta[col.name][:simple_formatted_attrs]
         col_comment = cols_meta[col.name][:col_comment]
+        col_enum_values = cols_meta[col.name][:col_enum_values]
 
         if options[:format_rdoc]
           info << sprintf("# %-#{max_size}.#{max_size}s<tt>%s</tt>", "*#{col_name}*::", attrs.unshift(col_type).join(", ")).rstrip + "\n"
@@ -195,11 +200,17 @@ module AnnotateModels
           if options[:with_comment_column]
             attrs_string = attrs.join(", ").rstrip
             attrs_remainder = (md_attributes_allowance - 2) - attrs_string.length
-            info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`%#{attrs_remainder}s | %s", col_name, " ", col_type, " ", attrs_string, " ", col_comment&.strip)).gsub('``', '  ').rstrip + "\n"
+            if col_enum_values.present?
+              col_comment = "#{col_comment} Enum: `#{col_enum_values.join("`, `")}`".strip
+            end
+            info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`%#{attrs_remainder}s | %s", col_name, " ", col_type, " ", attrs_string, " ", col_comment)).gsub('``', '  ').rstrip + "\n"
           else
             info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`", col_name, " ", col_type, " ", attrs.join(", ").rstrip)).gsub('``', '  ').rstrip + "\n"
           end
         elsif with_comments_column
+          if col_enum_values.present?
+            col_comment = "#{col_comment} Enum: [#{col_enum_values.join(" ")}]".strip
+          end
           info << format_default(col_name, max_size, col_type, bare_type_allowance, simple_formatted_attrs, bare_max_attrs_length, col_comment)
         else
           info << format_default(col_name, max_size, col_type, bare_type_allowance, simple_formatted_attrs)
