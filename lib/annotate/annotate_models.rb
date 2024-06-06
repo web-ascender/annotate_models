@@ -740,7 +740,7 @@ module AnnotateModels
       end
 
       @annotated_exports = {}
-      if options[:export_file].present? && File.exists?(options[:export_file])
+      if options[:export_file].present? && File.exist?(options[:export_file])
         File.truncate(options[:export_file], 0)
       end
 
@@ -758,13 +758,13 @@ module AnnotateModels
           # apply post-processing to the exported content:
           #   - remove the "Schema info" headers
           #   - remove leading comment chars (#) since the exported file is not a ruby file
-          @annotated_exports.sort.each do |table_name, export_info|
+          @annotated_exports.sort.each do |_table_name, export_info|
             File.open(options[:export_file], "ab") do |f|
               if options[:export_file_format] == "markdown"
                 # for markdown, format the table name line with an H1 header style
-                f.puts export_info.gsub(header,"").gsub(/^#\s/, "").gsub(/Table name:/, "# Table:")
+                f.puts export_info.gsub(header, "").gsub(/^#\s/, "").gsub(/Table name:/, "# Table:")
               else
-                f.puts export_info.gsub(header,"").gsub(/^#\s/, "")
+                f.puts export_info.gsub(header, "").gsub(/^#\s/, "")
               end
             end
           end
