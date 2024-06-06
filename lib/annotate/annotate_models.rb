@@ -207,9 +207,9 @@ module AnnotateModels
           else
             info << (sprintf("# **`%s`**%#{name_remainder}s | `%s`%#{type_remainder}s | `%s`", col_name, " ", col_type, " ", attrs.join(", ").rstrip)).gsub('``', '  ').rstrip + "\n"
           end
-        elsif with_comments_column
+        elsif with_comments_column || col_enum_values.present?
           if col_enum_values.present?
-            col_comment = "#{col_comment} Enum: [#{col_enum_values.join(" ")}]".strip
+            col_comment = "#{col_comment} Enum: #{col_enum_values.join(" | ")}".strip
           end
           info << format_default(col_name, max_size, col_type, bare_type_allowance, simple_formatted_attrs, bare_max_attrs_length, col_comment)
         else
