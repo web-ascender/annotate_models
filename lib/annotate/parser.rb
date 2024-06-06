@@ -320,7 +320,6 @@ module Annotate
                        'Export schema infomation as markdown or plain text') do |export_file_format|
         env["export_file_format"] = export_file_format
       end
-
     end
   end
 end
