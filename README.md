@@ -49,6 +49,24 @@ when using `SpatialAdapter`, `PostgisAdapter` or `PostGISAdapter`:
 #  path            :geometry        line_string, 4326
 ```
 
+It also annotates models with [Enumerize](https://github.com/brainspec/enumerize) attributes, documenting the possible values as a comment:
+
+```ruby
+class Document < ApplicationRecord
+  extend Enumerize
+  enumerize :document_type, in: %i[standard basic], default: :standard
+  # ...
+end
+
+# == Schema Information
+#
+# Table name: documents
+#
+#  id            :bigint(8)     not null, primary key
+#  document_type :string        default("standard"), not null       Enum: [standard basic]
+#
+```
+
 Also, if you pass the `-r` option, it'll annotate `routes.rb` with the output of `rake routes`.
 
 
