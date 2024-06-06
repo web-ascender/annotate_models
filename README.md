@@ -148,6 +148,17 @@ Everything above applies, except that `--routes` is not meaningful,
 and you will probably need to explicitly set one or more `--require` option(s), and/or one or more `--model-dir` options
 to inform `annotate` about the structure of your project and help it bootstrap and load the relevant code.
 
+### Export to a single file
+
+To export annotations to a single file, specifiy a filename with the `--export-file` option:
+
+    annotate --export-file=doc/annotated_models.md
+
+The default format for exports is `markdown` but it also supports `bare`:
+
+    annotate --export-file=doc/annotated_models.txt --export-file-format=bare
+    annotate --export-file=doc/annotated_models.md --export-file-format=markdown
+
 ## Configuration
 
 If you want to always skip annotations on a particular model, add this string
@@ -251,6 +262,9 @@ you can do so with a simple environment variable, instead of editing the
             --ignore-unknown-models      don't display warnings for bad model files
             --with-comment               include database comments in model annotations
             --with-comment-column        include database comments in model annotations, as its own column, after all others
+            --export-file FILE           Export schema infomation to a single file
+            --export-file-format FORMAT [markdown|bare]
+                                        Export schema infomation as markdown or plain text
 
 ### Option: `additional_file_patterns`
 
